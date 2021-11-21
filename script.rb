@@ -102,7 +102,7 @@ class GuessCode
         correct = current_counts[0]
         partial = current_counts[1]
         if correct == 4
-            puts "You guessed it! Nice job"
+            puts "You guessed it! Nice job."
             return false
         else
             puts "You guessed #{correct} correct and #{partial} partially correct."
@@ -112,67 +112,29 @@ class GuessCode
 end
 
 class CodeBreaker
-    @@all_guesses = ""
 
-    def guess_code
+    def human_guess_code
         choosing = true
-        if @@all_guesses != ""
-            puts "Here are your previous guesses:"
-            puts @@all_guesses
-        end
+        wrong_input = true
         while choosing
-            print "Slot1: "
-            slot1 = gets.chomp.to_i 
-            if ![1, 2, 3, 4, 5, 6].include?(slot1)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
+            code = gets.chomp.gsub(" ", "").chars.map(&:to_i)
+            if (code.all? { |char| [1, 2, 3, 4, 5, 6].include?(char) }) && code.length == 4
                 choosing = false
+                wrong_input = false
+            end
+            if wrong_input
+                print "Not a valid input. Please type four numbers 1-6. "
             end
         end
-        choosing = true
-        while choosing
-            print "Slot2: "
-            slot2 = gets.chomp.to_i 
-            if ![1, 2, 3, 4, 5, 6].include?(slot2)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        choosing = true
-        while choosing
-            print "Slot3: "
-            slot3 = gets.chomp.to_i 
-            if ![1, 2, 3, 4, 5, 6].include?(slot3)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        choosing = true
-        while choosing
-            print "Slot4: "
-            slot4 = gets.chomp.to_i 
-            if ![1, 2, 3, 4, 5, 6].include?(slot4)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        puts "Your guess is: | #{slot1} #{slot2} #{slot3} #{slot4} |"
-        @@all_guesses += "| #{slot1} #{slot2} #{slot3} #{slot4} |\n"
-        GuessCode.new(slot1, slot2, slot3, slot4)
+        puts "Your guess is: | #{code[0]} #{code[1]} #{code[2]} #{code[3]} |"
+        GuessCode.new(code[0], code[1], code[2], code[3])
     end
 end
 
 def choose_guesser
     choosing = true
+    print "Do you want to be the guesser? Type Y for yes or N for no: "
     while choosing
-        print "Do you want to be the guesser? Type Y for yes or N for no: "
         human_guesser = gets.strip.upcase
         if human_guesser == "Y"
             choosing = false
@@ -180,7 +142,7 @@ def choose_guesser
         elsif human_guesser == "N"
             return false
         else
-            puts "Invalid input. Please type Y or N."
+            print "Invalid input. Please type Y or N. "
             choosing = true
         end
     end
@@ -191,53 +153,22 @@ def create_gameboard(human_guesser)
     if human_guesser == true
         SecretCode.new(choices.sample, choices.sample, choices.sample, choices.sample)
     else
-        puts "Create your secret code now. Please type a number 1-6 for each slot."
+        print "Create your secret code now. Please type four numbers 1-6. "
         choosing = true
+        wrong_input = true
         while choosing
-            print "Slot1: "
-            slot1 = gets.chomp.to_i
-            if !choices.include?(slot1)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
+            code = gets.chomp.gsub(" ", "").chars.map(&:to_i)
+            p code
+            if (code.all? { |char| choices.include?(char) }) && code.length == 4
                 choosing = false
+                wrong_input = false
+            end
+            if wrong_input
+                print "Not a valid input. Please type four numbers 1-6. "
             end
         end
-        choosing = true
-        while choosing
-            print "Slot2: "
-            slot2 = gets.chomp.to_i
-            if !choices.include?(slot2)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        choosing = true
-        while choosing
-            print "Slot3: "
-            slot3 = gets.chomp.to_i
-            if !choices.include?(slot3)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        choosing = true
-        while choosing
-            print "Slot4: "
-            slot4 = gets.chomp.to_i
-            if !choices.include?(slot4)
-                puts "Not a valid input. Please type a number 1-6."
-                choosing = true
-            else
-                choosing = false
-            end
-        end
-        puts "Your secret code is: | #{slot1} #{slot2} #{slot3} #{slot4} |"
-        SecretCode.new(slot1, slot2, slot3, slot4)
+        puts "Your secret code is: | #{code[0]} #{code[1]} #{code[2]} #{code[3]} |"
+        SecretCode.new(code[0], code[1], code[2], code[3])
     end
 end
 
@@ -250,14 +181,14 @@ def play_mastermind
         puts "| Slot1 | Slot2 | Slot3 | Slot4 |"
         puts "Guess a number 1-6 for all slots."
         while guesses < 12 && playing
+            print "You have #{12-guesses} guesses left. Type in your guess. "
             guesser = CodeBreaker.new
-            current_guess = guesser.guess_code
+            current_guess = guesser.human_guess_code
             playing = current_guess.give_feedback(new_secret_code)
-            puts "You have #{11-guesses} guesses left."
-            puts "------------------------------------------------"
             guesses += 1
+            puts "------------------------------------------------"
         end
-        if guesses == 12
+        if guesses == 12 && playing == true
             puts "Out of guesses! The correct code was #{new_secret_code.visual}"
         end
     else
