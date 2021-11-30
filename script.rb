@@ -97,7 +97,7 @@ class GuessCode
         [correct, partial]
     end
 
-    def give_feedback(secret_code)
+    def give_feedback_human(secret_code)
         current_counts = check_code(secret_code)
         correct = current_counts[0]
         partial = current_counts[1]
@@ -109,11 +109,24 @@ class GuessCode
             return true
         end
     end
+
+    def give_feedback_computer(secret_code)
+        current_counts = check_code(secret_code)
+        correct = current_counts[0]
+        partial = current_counts[1]
+        if correct == 4
+            puts "I guessed it! Good game."
+            return false
+        else
+            puts "I guessed #{correct} correct and #{partial} partially correct."
+            return true
+        end
+    end
 end
 
 class CodeBreaker
 
-    def human_guess_code
+    def guess_code_human
         choosing = true
         wrong_input = true
         while choosing
@@ -128,6 +141,17 @@ class CodeBreaker
         end
         puts "Your guess is: | #{code[0]} #{code[1]} #{code[2]} #{code[3]} |"
         GuessCode.new(code[0], code[1], code[2], code[3])
+    end
+
+    def guess_code_computer
+        possible_codes = [1111, 6666].reject {|code| code.any? { |char| [7, 8, 9, 0].include?(char) }}
+        current_guess = GuessCode.new(1, 1, 2, 2)
+        choosing = true
+        while choosing
+            puts "My first guess is: #{current_guess.visual}"
+            puts possible_codes
+            choosing = false
+        end
     end
 end
 
@@ -176,23 +200,27 @@ def play_mastermind
     guesses = 0
     playing = true
     human_guesser = choose_guesser
-    new_secret_code = create_gameboard(human_guesser)
+    secret_code = create_gameboard(human_guesser)
     if human_guesser == true
         puts "| Slot1 | Slot2 | Slot3 | Slot4 |"
         puts "Guess a number 1-6 for all slots."
         while guesses < 12 && playing
             print "You have #{12-guesses} guesses left. Type in your guess. "
             guesser = CodeBreaker.new
-            current_guess = guesser.human_guess_code
-            playing = current_guess.give_feedback(new_secret_code)
+            current_guess = guesser.guess_code_human
+            playing = current_guess.give_feedback_human(secret_code)
             guesses += 1
             puts "------------------------------------------------"
         end
         if guesses == 12 && playing == true
-            puts "Out of guesses! The correct code was #{new_secret_code.visual}"
+            puts "Out of guesses! The correct code was #{secret_code.visual}"
         end
     else
-        puts "bye"
+        computer = CodeBreaker.new
+        current_guess = computer.guess_code_computer
+        playing = current_guess.give_feedback_computer(secret_code)
+        guesses += 1
+        puts "------------------------------------------------"
     end
 end
 
